@@ -1,4 +1,4 @@
-package com.example.examplemod;
+package com.monolith.monolith.modules.combat;
 
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
@@ -15,12 +15,14 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 
+// IMPORT GUI TO READ GRINDER SETTINGS
+import com.monolith.monolith.gui.MonolithModGUI;
+
 public class LeftClicker {
 
     // --- SETTINGS ---
     public static boolean enabled = false;
     public static boolean triggerBot = false;
-    public static boolean autoGrindActive = false; // NEW: Controlled by AutoGrind
 
     public static double minCPS = 9;
     public static double maxCPS = 13;
@@ -38,27 +40,40 @@ public class LeftClicker {
 
     @SubscribeEvent
     public void onRenderTick(TickEvent.RenderTickEvent ev) {
-        // Allow running if Enabled OR if AutoGrind is forcing it
-        if ((!enabled && !autoGrindActive) || ev.phase != Phase.END || mc.thePlayer == null) return;
+        // --- MODIFIED: Wake up if Clicker IS enabled OR if Grinder IS enabled ---
+        boolean isGrinder = MonolithModGUI.AutoGrinder.enabled;
+
+        if ((!enabled && !isGrinder) || ev.phase != Phase.END || mc.thePlayer == null) return;
+
         if (mc.currentScreen != null || !mc.inGameHasFocus) return;
-        ravenClick();
+
+        ravenClick(isGrinder);
     }
 
-    private void ravenClick() {
+    private void ravenClick(boolean isGrinderMode) {
         Mouse.poll();
 
+        // --- TRIGGERBOT LOGIC ---
+        // In Grinder mode, AimAssist sets 'triggerBot' to true when locked on.
+        // We rely on that.
+
         // 1. Safety Release
-        // Stop if: Mouse Up AND Not Mid-Click AND TriggerBot Off AND AutoGrind Off
-        if (!Mouse.isButtonDown(0) && !leftDown && !triggerBot && !autoGrindActive) {
+        // Stop if: Mouse Up AND Not Mid-Click AND TriggerBot Off
+        if (!Mouse.isButtonDown(0) && !leftDown && !triggerBot) {
             KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
             setMouseButtonState(0, false);
             return;
         }
 
         // 2. Execution
-        // Click if: Mouse Down OR TriggerBot OR AutoGrind OR Mid-Click
-        if (Mouse.isButtonDown(0) || triggerBot || autoGrindActive || leftDown) {
-            if (weaponOnly && !isPlayerHoldingWeapon()) return;
+        // Click if: Mouse Down OR TriggerBot OR Mid-Click
+        if (Mouse.isButtonDown(0) || triggerBot || leftDown) {
+
+            // --- MODIFIED: WEAPON CHECK ---
+            // If in Grinder Mode, we IGNORE the "Weapon Only" setting.
+            // If in Combat Mode, we respect it.
+            if (!isGrinderMode && weaponOnly && !isPlayerHoldingWeapon()) return;
+
             leftClickExecute(mc.gameSettings.keyBindAttack.getKeyCode());
         }
     }

@@ -20,8 +20,8 @@ plugins {
 }
 */
 version = "1.0"
-group= "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "modid"
+group= "com.user.monolith" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "monolith V1"
 
 // --- ADDED BY AI: ENABLE JAVA 8 ---
 sourceCompatibility = 1.8

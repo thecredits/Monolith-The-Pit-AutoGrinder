@@ -20,3 +20,23 @@ build
 # other
 eclipse
 run
+# Build artifacts
+build/
+.gradle/
+
+# Compiled files
+*.class
+*.jar
+
+# Logs and temps
+*.log
+tmp/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
